@@ -69,7 +69,6 @@ namespace KRPC.MechJeb.Maneuver
             OperationEccentricity.Load ();
             OperationEllipticize.Load ();
             OperationInclination.Load ();
-            OperationInterplanetaryTransfer.Load ();
             OperationKillRelVel.Load ();
             OperationLambert.Load ();
             OperationLan.Load ();

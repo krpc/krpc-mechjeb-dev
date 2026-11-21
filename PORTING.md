@@ -12,14 +12,15 @@ kRPC v0.8.0's service, built here with `dotnet`, against MechJeb 2.15.4.0
 
 ## To Port
 
-54 members fail to bind (`test_bindings.py`), down from 70 at the start.
+50 members fail to bind (`test_bindings.py`), down from 70 at the start.
 
 | Area | Missing in the dev build | Failing tests |
 | --- | --- | --- |
-| Aircraft autopilot | `MechJebModuleAirplaneAutopilot` | `AircraftAutopilot` settings (27) |
-| Aircraft approach | `MechJebModuleSpaceplaneAutopilot`, `Runway` | `test_autoland`, `test_runways`, settings (5) |
 | Ascent | `MechJebModuleAscentBaseAutopilot` (2 bindings), `MechJebModuleGuidanceController`, `MechJebModuleAscentMenu.TimeToPhaseAngle`, 46 members of `MechJebModuleAscentSettings` | 7 of 9 ascent tests, settings of `AscentGuidance`, `AscentSettings`, `ClassicPath`, `PVGSettings` (40) |
-| Interplanetary transfer | `OperationInterplanetaryTransfer`, removed in MechJeb | `OperationInterplanetaryTransfer` setting (1) |
+
+The docs still link to the removed aircraft autopilot from `doc/api/mechjeb/migration.tmpl`,
+kRPC's page for moving from KRPC.MechJeb 0.7. Phase 4 replaces it with a page for moving from
+kRPC's service.
 
 ## Upstream
 

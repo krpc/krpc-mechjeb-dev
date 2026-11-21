@@ -28,11 +28,6 @@ class TestManeuverPlanner(MechJebTestCase):
                 (planner.operation_ellipticize, "new_apoapsis", 123000),
                 (planner.operation_ellipticize, "new_periapsis", 98000),
                 (planner.operation_inclination, "new_inclination", 12),
-                (
-                    planner.operation_interplanetary_transfer,
-                    "wait_for_phase_angle",
-                    False,
-                ),
                 (planner.operation_lambert, "intercept_interval", 1234),
                 (planner.operation_lan, "new_lan", 12),
                 (planner.operation_longitude, "new_surface_longitude", 12),

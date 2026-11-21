@@ -23,7 +23,6 @@ namespace KRPC.MechJeb
         readonly OperationEccentricity operationEccentricity = new OperationEccentricity ();
         readonly OperationEllipticize operationEllipticize = new OperationEllipticize ();
         readonly OperationInclination operationInclination = new OperationInclination ();
-        readonly OperationInterplanetaryTransfer operationInterplanetaryTransfer = new OperationInterplanetaryTransfer ();
         readonly OperationKillRelVel operationKillRelVel = new OperationKillRelVel ();
         readonly OperationLambert operationLambert = new OperationLambert ();
         readonly OperationLan operationLan = new OperationLan ();
@@ -111,14 +110,6 @@ namespace KRPC.MechJeb
         [KRPCProperty]
         public OperationInclination OperationInclination {
             get { return operationInclination; }
-        }
-
-        /// <summary>
-        /// The operation that transfers to another planet.
-        /// </summary>
-        [KRPCProperty]
-        public OperationInterplanetaryTransfer OperationInterplanetaryTransfer {
-            get { return operationInterplanetaryTransfer; }
         }
 
         /// <summary>

@@ -12,6 +12,11 @@ Built against kRPC v0.8.0, for MechJeb dev-2.16.0.0-2120.
 - `DeployableController.RetractAll` leaves parts that are still extending extended, as in
   MechJeb 2.16
 
+- Removed in MechJeb 2.16
+  - **Breaking:** Remove `AircraftAutopilot` and `AircraftApproach`, as MechJeb 2.16 has no
+    aircraft autopilot
+  - **Breaking:** Remove `OperationInterplanetaryTransfer`. Use `OperationAdvancedTransfer`
+
 - Maneuver planner
   - **Breaking:** Replace `OperationTransfer.Rendezvous` with `MatchOrbit`, its opposite, as in
     MechJeb 2.16

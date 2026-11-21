@@ -20,8 +20,6 @@ namespace KRPC.MechJeb
         static Func<global::Vessel, object> getMasterMechJeb;
         static Func<object, string, object> getComputerModule;
 
-        static readonly AircraftApproach aircraftApproach = new AircraftApproach ();
-        static readonly AircraftAutopilot aircraftAutopilot = new AircraftAutopilot ();
         static readonly AscentGuidance ascentGuidance = new AscentGuidance ();
         static readonly AttitudeAdjustment attitudeAdjustment = new AttitudeAdjustment ();
         static readonly DockingAutopilot dockingAutopilot = new DockingAutopilot ();
@@ -44,8 +42,6 @@ namespace KRPC.MechJeb
             ComputerModule.Load ();
             AutopilotModule.Load ();
             VesselState.Load (core);
-            AircraftApproach.Load ();
-            AircraftAutopilot.Load ();
             AscentGuidance.Load ();
             AscentSettings.Load ();
             AttitudeAdjustment.Load ();
@@ -115,22 +111,6 @@ namespace KRPC.MechJeb
         [KRPCProperty]
         public static bool Ready {
             get { return MasterMechJeb != null; }
-        }
-
-        /// <summary>
-        /// The Aircraft Approach and Autoland window.
-        /// </summary>
-        [KRPCProperty]
-        public static AircraftApproach AircraftApproach {
-            get { return aircraftApproach; }
-        }
-
-        /// <summary>
-        /// The Aircraft Autopilot window.
-        /// </summary>
-        [KRPCProperty]
-        public static AircraftAutopilot AircraftAutopilot {
-            get { return aircraftAutopilot; }
         }
 
         /// <summary>
