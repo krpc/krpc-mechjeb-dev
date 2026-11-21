@@ -19,6 +19,11 @@ namespace KRPC.MechJeb
         static Field<object, double> fairingMaxAerothermalFlux;
         static Field<object, bool> hotStaging;
         static Field<object, double> hotStagingLeadTime;
+        static Field<object, bool> fairingMaxDynamicPressureEnabled;
+        static Field<object, bool> fairingMinAltitudeEnabled;
+        static Field<object, bool> fairingMaxAerothermalFluxEnabled;
+        static Field<object, bool> dropSolids;
+        static Field<object, double> dropSolidsTwrPct;
         static Field<object, bool> autostagingOnce;
         static Action<object, object> autostageOnce;
 
@@ -34,6 +39,11 @@ namespace KRPC.MechJeb
             fairingMaxAerothermalFlux = Bindings.EditableDouble (type, "FairingMaxAerothermalFlux");
             hotStaging = type.Field<object, bool> ("HotStaging");
             hotStagingLeadTime = Bindings.EditableDouble (type, "HotStagingLeadTime");
+            fairingMaxDynamicPressureEnabled = type.Field<object, bool> ("FairingMaxDynamicPressureEnabled");
+            fairingMinAltitudeEnabled = type.Field<object, bool> ("FairingMinAltitudeEnabled");
+            fairingMaxAerothermalFluxEnabled = type.Field<object, bool> ("FairingMaxAerothermalFluxEnabled");
+            dropSolids = type.Field<object, bool> ("DropSolids");
+            dropSolidsTwrPct = Bindings.EditableDouble (type, "DropSolidsTwrPct");
             autostagingOnce = type.Field<object, bool> ("AutostagingOnce");
             autostageOnce = type.Method<Action<object, object>> ("AutostageOnce");
         }
@@ -70,8 +80,18 @@ namespace KRPC.MechJeb
         }
 
         /// <summary>
+        /// Whether to wait for <see cref="FairingMaxDynamicPressure"/> to jettison a fairing.
+        /// </summary>
+        [KRPCProperty]
+        public bool FairingMaxDynamicPressureEnabled {
+            get { return fairingMaxDynamicPressureEnabled.Get (Instance); }
+            set { fairingMaxDynamicPressureEnabled.Set (Instance, value); }
+        }
+
+        /// <summary>
         /// The largest dynamic pressure at which the controller jettisons a fairing, in pascals.
         /// </summary>
+        /// <remarks>Requires <see cref="FairingMaxDynamicPressureEnabled"/>.</remarks>
         [KRPCProperty]
         public double FairingMaxDynamicPressure {
             get { return fairingMaxDynamicPressure.Get (Instance); }
@@ -79,8 +99,18 @@ namespace KRPC.MechJeb
         }
 
         /// <summary>
+        /// Whether to wait for <see cref="FairingMinAltitude"/> to jettison a fairing.
+        /// </summary>
+        [KRPCProperty]
+        public bool FairingMinAltitudeEnabled {
+            get { return fairingMinAltitudeEnabled.Get (Instance); }
+            set { fairingMinAltitudeEnabled.Set (Instance, value); }
+        }
+
+        /// <summary>
         /// The lowest altitude at which the controller jettisons a fairing, in meters.
         /// </summary>
+        /// <remarks>Requires <see cref="FairingMinAltitudeEnabled"/>.</remarks>
         [KRPCProperty]
         public double FairingMinAltitude {
             get { return fairingMinAltitude.Get (Instance); }
@@ -97,9 +127,19 @@ namespace KRPC.MechJeb
         }
 
         /// <summary>
+        /// Whether to wait for <see cref="FairingMaxAerothermalFlux"/> to jettison a fairing.
+        /// </summary>
+        [KRPCProperty]
+        public bool FairingMaxAerothermalFluxEnabled {
+            get { return fairingMaxAerothermalFluxEnabled.Get (Instance); }
+            set { fairingMaxAerothermalFluxEnabled.Set (Instance, value); }
+        }
+
+        /// <summary>
         /// The largest aerothermal flux at which the controller jettisons a fairing, in
         /// <unit>W/m^2</unit>.
         /// </summary>
+        /// <remarks>Requires <see cref="FairingMaxAerothermalFluxEnabled"/>.</remarks>
         [KRPCProperty]
         public double FairingMaxAerothermalFlux {
             get { return fairingMaxAerothermalFlux.Get (Instance); }
@@ -123,6 +163,27 @@ namespace KRPC.MechJeb
         public double HotStagingLeadTime {
             get { return hotStagingLeadTime.Get (Instance); }
             set { hotStagingLeadTime.Set (Instance, value); }
+        }
+
+        /// <summary>
+        /// Whether the controller drops the solid boosters of the next stage early, once their
+        /// thrust no longer pays for their mass.
+        /// </summary>
+        [KRPCProperty]
+        public bool DropSolids {
+            get { return dropSolids.Get (Instance); }
+            set { dropSolids.Set (Instance, value); }
+        }
+
+        /// <summary>
+        /// The fraction of the vessel's thrust-to-weight ratio at which the solid boosters
+        /// drop, between 0 and 1.
+        /// </summary>
+        /// <remarks>Requires <see cref="DropSolids"/>.</remarks>
+        [KRPCProperty]
+        public double DropSolidsTwrPct {
+            get { return dropSolidsTwrPct.Get (Instance); }
+            set { dropSolidsTwrPct.Set (Instance, value); }
         }
 
         /// <summary>

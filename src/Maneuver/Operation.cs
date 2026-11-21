@@ -78,6 +78,7 @@ namespace KRPC.MechJeb.Maneuver
             OperationPlane.Load ();
             OperationResonantOrbit.Load ();
             OperationSemiMajor.Load ();
+            OperationStationaryOrbit.Load ();
             OperationTransfer.Load ();
         }
 

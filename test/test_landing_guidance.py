@@ -15,6 +15,9 @@ class TestLandingGuidance(MechJebTestCase):
                 (landing, "limit_chutes_stage", 2),
                 (landing, "rcs_adjustment", False),
                 (landing, "autowarp", False),
+                (landing, "jettison_before_entry", True),
+                (landing, "limiter_min_throttle", True),
+                (landing, "min_throttle", 0.25),
             ]
         )
 

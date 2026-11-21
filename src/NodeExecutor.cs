@@ -12,6 +12,9 @@ namespace KRPC.MechJeb
         static Field<object, double> leadTime;
         static Field<object, bool> rcsOnly;
         static Field<object, bool> killRollRotation;
+        static Field<object, double> initialWarpLeadTime;
+        static Field<object, double> alignedTolerance;
+        static Field<object, double> warpAlignedTolerance;
         static Action<object, object> executeOneNode;
         static Action<object, object> executeAllNodes;
         static Action<object> abort;
@@ -23,6 +26,9 @@ namespace KRPC.MechJeb
             leadTime = Bindings.EditableDouble (type, "LeadTime");
             rcsOnly = type.Field<object, bool> ("RCSOnly");
             killRollRotation = type.Field<object, bool> ("KillRollRotation");
+            initialWarpLeadTime = Bindings.EditableDouble (type, "InitialWarpLeadTime");
+            alignedTolerance = Bindings.EditableDouble (type, "AlignedToleranceDegrees");
+            warpAlignedTolerance = Bindings.EditableDouble (type, "WarpAlignedToleranceDegrees");
             executeOneNode = type.Method<Action<object, object>> ("ExecuteOneNode");
             executeAllNodes = type.Method<Action<object, object>> ("ExecuteAllNodes");
             abort = type.Method<Action<object>> ("Abort");
@@ -55,6 +61,21 @@ namespace KRPC.MechJeb
         internal static bool KillRollRotation {
             get { return killRollRotation.Get (executor.Instance); }
             set { killRollRotation.Set (executor.Instance, value); }
+        }
+
+        internal static double InitialWarpLeadTime {
+            get { return initialWarpLeadTime.Get (executor.Instance); }
+            set { initialWarpLeadTime.Set (executor.Instance, value); }
+        }
+
+        internal static double AlignedTolerance {
+            get { return alignedTolerance.Get (executor.Instance); }
+            set { alignedTolerance.Set (executor.Instance, value); }
+        }
+
+        internal static double WarpAlignedTolerance {
+            get { return warpAlignedTolerance.Get (executor.Instance); }
+            set { warpAlignedTolerance.Set (executor.Instance, value); }
         }
 
         internal static bool Executing {

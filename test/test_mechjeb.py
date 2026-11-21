@@ -12,14 +12,13 @@ class TestMechJeb(MechJebTestCase):
         mj = self.mj
         windows = [
             mj.maneuver_planner,
-            mj.landing_guidance,
             mj.rendezvous_autopilot,
         ]
         old = mj.maneuver_planner.autowarp
         try:
             for window in windows:
                 window.autowarp = not old
-                self.assertEqual([not old] * 3, [w.autowarp for w in windows])
+                self.assertEqual([not old] * 2, [w.autowarp for w in windows])
                 window.autowarp = old
         finally:
             mj.maneuver_planner.autowarp = old

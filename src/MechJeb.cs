@@ -23,6 +23,7 @@ namespace KRPC.MechJeb
         static readonly AscentGuidance ascentGuidance = new AscentGuidance ();
         static readonly AttitudeAdjustment attitudeAdjustment = new AttitudeAdjustment ();
         static readonly DockingAutopilot dockingAutopilot = new DockingAutopilot ();
+        static readonly HoverslamAutopilot hoverslamAutopilot = new HoverslamAutopilot ();
         static readonly LandingGuidance landingGuidance = new LandingGuidance ();
         static readonly RendezvousAutopilot rendezvousAutopilot = new RendezvousAutopilot ();
         static readonly RoverAutopilot roverAutopilot = new RoverAutopilot ();
@@ -49,6 +50,7 @@ namespace KRPC.MechJeb
             ClassicPath.Load ();
             DeployableController.Load ();
             DockingAutopilot.Load ();
+            HoverslamAutopilot.Load ();
             LandingGuidance.Load ();
             ManeuverPlanner.Load ();
             NodeExecutor.Load ();
@@ -135,6 +137,14 @@ namespace KRPC.MechJeb
         [KRPCProperty]
         public static DockingAutopilot DockingAutopilot {
             get { return dockingAutopilot; }
+        }
+
+        /// <summary>
+        /// The hoverslam autopilot.
+        /// </summary>
+        [KRPCProperty]
+        public static HoverslamAutopilot HoverslamAutopilot {
+            get { return hoverslamAutopilot; }
         }
 
         /// <summary>

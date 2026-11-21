@@ -43,3 +43,18 @@ Built against kRPC v0.8.0, for MechJeb dev-2.16.0.0-2120.
 - Maneuver planner
   - **Breaking:** Replace `OperationTransfer.Rendezvous` with `MatchOrbit`, its opposite, as in
     MechJeb 2.16
+  - **Breaking:** `OperationAdvancedTransfer` defaults to MechJeb's porkchop mode. Set `Mode`
+    to `LimitedTime` for the search up to `MaxArrivalTime`
+  - Add the porkchop selection to `OperationAdvancedTransfer`, with `SelectLowestDeltaV`,
+    `SelectAsap`, `Select` and the selected departure, duration and delta-v
+  - Add `TargetInclination` to `OperationAdvancedTransfer`, and `Inclination` to
+    `OperationCourseCorrection` and `OperationMoonReturn`
+  - Add `OperationStationaryOrbit`
+  - Add `InitialWarpLeadTime`, `AlignedTolerance` and `WarpAlignedTolerance` to the node
+    execution settings of `ManeuverPlanner`
+
+- Add `HoverslamAutopilot`, MechJeb 2.16's single-burn landing, with its landing prediction
+- **Breaking:** `LandingGuidance.Autowarp` is the landing's own, no longer shared with the
+  maneuver planner
+- Add `LimiterMinThrottle`, `MinThrottle` and `JettisonBeforeEntry` to `LandingGuidance`
+- Add the fairing conditions and `DropSolids` to `Autostaging`

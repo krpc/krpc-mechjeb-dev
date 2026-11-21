@@ -16,6 +16,8 @@ class TestManeuverPlanner(MechJebTestCase):
             [
                 (planner.operation_advanced_transfer, "max_arrival_time", 1234567),
                 (planner.operation_advanced_transfer, "include_capture_burn", True),
+                (planner.operation_advanced_transfer, "target_inclination_flag", True),
+                (planner.operation_advanced_transfer, "target_inclination", 12),
                 (planner.operation_advanced_transfer, "periapsis_height", 123000),
                 (planner.operation_apoapsis, "new_apoapsis", 123000),
                 (
@@ -24,14 +26,19 @@ class TestManeuverPlanner(MechJebTestCase):
                     123000,
                 ),
                 (planner.operation_course_correction, "intercept_distance", 123),
+                (planner.operation_course_correction, "inclination_flag", True),
+                (planner.operation_course_correction, "inclination", 12),
                 (planner.operation_eccentricity, "new_eccentricity", 0.5),
                 (planner.operation_ellipticize, "new_apoapsis", 123000),
                 (planner.operation_ellipticize, "new_periapsis", 98000),
                 (planner.operation_inclination, "new_inclination", 12),
                 (planner.operation_lambert, "intercept_interval", 1234),
+                (planner.operation_stationary_orbit, "target_longitude", 12.5),
                 (planner.operation_lan, "new_lan", 12),
                 (planner.operation_longitude, "new_surface_longitude", 12),
                 (planner.operation_moon_return, "moon_return_altitude", 123000),
+                (planner.operation_moon_return, "inclination_flag", True),
+                (planner.operation_moon_return, "inclination", 12),
                 (planner.operation_periapsis, "new_periapsis", 98000),
                 (planner.operation_resonant_orbit, "resonance_numerator", 3),
                 (planner.operation_resonant_orbit, "resonance_denominator", 4),
@@ -43,6 +50,9 @@ class TestManeuverPlanner(MechJebTestCase):
                 (planner.operation_transfer, "coplanar", True),
                 (planner, "autowarp", False),
                 (planner, "lead_time", 12),
+                (planner, "initial_warp_lead_time", 123),
+                (planner, "aligned_tolerance", 2.5),
+                (planner, "warp_aligned_tolerance", 12.5),
                 (planner, "rcs_only", True),
                 (planner, "kill_roll_rotation", False),
                 (planner.operation_apoapsis.time_selector, "lead_time", 123),
@@ -111,6 +121,17 @@ class TestManeuverPlannerInOrbit(MechJebInOrbitTestCase):
         self.assertEqual(1, len(nodes))
         self.assertAlmostEqual(0.1, nodes[0].orbit.eccentricity, delta=0.001)
 
+    def test_stationary_orbit(self):
+        operation = self.planner.operation_stationary_orbit
+        operation.target_longitude = 12
+        nodes = operation.make_nodes()
+        self.assertEqual("", operation.error_message)
+        self.assertEqual(2, len(nodes))
+        orbit = nodes[1].orbit
+        kerbin = self.sc.bodies["Kerbin"]
+        self.assertAlmostEqual(kerbin.rotational_period, orbit.period, delta=60)
+        self.assertLess(orbit.eccentricity, 0.01)
+
     def test_transfer_without_capture(self):
         operation = self.planner.operation_transfer
         mun = self.sc.bodies["Mun"]
@@ -130,6 +151,7 @@ class TestManeuverPlannerInOrbit(MechJebInOrbitTestCase):
     def test_advanced_transfer(self):
         operation = self.planner.operation_advanced_transfer
         periapsis_height = operation.periapsis_height
+        operation.mode = self.mj.AdvancedTransferMode.limited_time
         self.sc.target_body = self.sc.bodies["Duna"]
         try:
             self.wait_until(lambda: self.mj.target_controller.normal_target_exists)
@@ -150,6 +172,36 @@ class TestManeuverPlannerInOrbit(MechJebInOrbitTestCase):
             self.assertEqual(self.sc.bodies["Sun"], nodes[0].orbit.next_orbit.body)
         finally:
             operation.periapsis_height = periapsis_height
+            operation.mode = self.mj.AdvancedTransferMode.porkchop
+            self.sc.clear_target()
+
+    def test_advanced_transfer_porkchop(self):
+        operation = self.planner.operation_advanced_transfer
+        self.assertEqual(self.mj.AdvancedTransferMode.porkchop, operation.mode)
+        self.sc.target_body = self.sc.bodies["Duna"]
+        try:
+            self.wait_until(lambda: self.mj.target_controller.normal_target_exists)
+            with self.assertRaisesRegex(
+                self.mj.OperationException, "Started computation"
+            ):
+                operation.make_nodes()
+            with self.assertRaisesRegex(RuntimeError, "not finished"):
+                operation.select_asap()
+            self.wait_while(lambda: operation.searching, timeout=300)
+            self.assertFalse(operation.search_failed)
+            lowest = operation.selected_delta_v
+            departure = operation.selected_departure_time
+            self.assertGreater(lowest, 0)
+            operation.select_asap()
+            self.assertLessEqual(operation.selected_departure_time, departure)
+            self.assertGreaterEqual(operation.selected_delta_v, lowest)
+            operation.select(departure, operation.selected_duration)
+            operation.select_lowest_delta_v()
+            self.assertEqual(lowest, operation.selected_delta_v)
+            nodes = operation.make_nodes()
+            self.assertEqual(1, len(nodes))
+            self.assertEqual(self.sc.bodies["Sun"], nodes[0].orbit.next_orbit.body)
+        finally:
             self.sc.clear_target()
 
     def test_advanced_transfer_without_target(self):

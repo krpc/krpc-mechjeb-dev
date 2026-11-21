@@ -1,7 +1,6 @@
 # Port to MechJeb 2.16
 
-The work list for the port, from the test runs against dev-2.16.0.0-2120. Remove each entry as it
-is ported.
+The state of the port to dev-2.16.0.0-2120. `CHANGELOG.md` lists what changed for users.
 
 ## Baseline
 
@@ -10,17 +9,14 @@ kRPC v0.8.0's service, built here with `dotnet`, against MechJeb 2.15.4.0
 `TestManeuverPlannerInOrbit.test_advanced_transfer` failed once, with MechJeb's
 `PlaceManeuverNode: bad dV: [NaN, NaN, NaN]`, and passed on its own.
 
-## To Port
+## Ported
 
-50 members fail to bind (`test_bindings.py`), down from 70 at the start.
+Every member binds against the dev build (`test_bindings.py`), from 70 missing at the start:
+the renames, the removed aircraft autopilot and interplanetary transfer, and the PSG ascent.
 
-| Area | Missing in the dev build | Failing tests |
-| --- | --- | --- |
-| Ascent | `MechJebModuleAscentBaseAutopilot` (2 bindings), `MechJebModuleGuidanceController`, `MechJebModuleAscentMenu.TimeToPhaseAngle`, 46 members of `MechJebModuleAscentSettings` | 7 of 9 ascent tests, settings of `AscentGuidance`, `AscentSettings`, `ClassicPath`, `PVGSettings` (40) |
-
-The docs still link to the removed aircraft autopilot from `doc/api/mechjeb/migration.tmpl`,
-kRPC's page for moving from KRPC.MechJeb 0.7. Phase 4 replaces it with a page for moving from
-kRPC's service.
+The docs still link to the removed members from `doc/api/mechjeb/migration.tmpl`, kRPC's page
+for moving from KRPC.MechJeb 0.7. Phase 4 replaces it with a page for moving from kRPC's
+service.
 
 ## Upstream
 
@@ -28,15 +24,24 @@ kRPC's service.
   `test_transfer_without_capture` fails. MechJeb's "Flyby/Impact" mode passes `rendezvous: false`
   to `DeltaVAndTimeForHohmannTransfer` (`Capture && !MatchOrbit`), so the burn reaches the
   target's orbit but not the target. 2.15 passed `Rendezvous`, true by default.
+* A PSG ascent of the stock Kerbal X to an 80 km circular orbit ended once with a periapsis
+  of about 39 km, and reached the orbit on the next run. In the miss, guidance converged and
+  flew all five stages to `TERMINAL -> FINISHED`, as the terminal check compares only the
+  angular momentum, which matched the target. The eccentricity came out at about 0.06.
+  `TestAscentGuidancePSG` may fail now and then.
+* The hoverslam autopilot lands the Basic craft from a near-vertical fall. From a 31 km
+  apoapsis with 560 m/s of horizontal speed, it touches down at 25 m/s sideways and the craft
+  breaks up. `TestHoverslamLanding` flies the near-vertical fall.
 
 ## New in 2.16
 
-Members the service could add once the port is done:
+Added: the hoverslam autopilot and its prediction, the stationary orbit operation, the porkchop
+selection and target inclination of the advanced transfer, the inclination of the course
+correction and moon return, the node executor's warp and alignment settings, the landing's own
+autowarp and minimum throttle, its jettison before entry, and the new autostaging options.
 
-* `Inclination` and `InclinationFlag` on `OperationCourseCorrection` and `OperationMoonReturn`.
-* `OperationAdvancedTransfer`: the porkchop mode, through `Compute`, `SelectTimes` and
-  `TryGetSelection`, and the target inclination.
-* `OperationStationaryOrbit`, a new operation.
-* Per-autopilot throttle limits, `IThrustLimits` through `MechJebModuleThrustController.Limits`.
+Not added:
 
-`build/dev-step1.log` from `pytest -v -rfE` has each error.
+* PSG's stage plan, edited in MechJeb's PSG Stages window. kOS does not expose it either.
+* The porkchop search window: the departure and transfer time ranges, which `Compute` takes.
+  The search uses MechJeb's defaults.

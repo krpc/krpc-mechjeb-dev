@@ -18,6 +18,10 @@ namespace KRPC.MechJeb
         static Field<object, bool> deployChutes;
         static Field<object, int> limitChutesStage;
         static Field<object, bool> rcsAdjustment;
+        static Field<object, bool> autowarp;
+        static Field<object, bool> jettisonBeforeEntry;
+        static Field<object, bool> limiterMinThrottle;
+        static Field<object, double> minThrottle;
         static Action<object, object> landAtPositionTarget;
         static Action<object, object> landUntargeted;
         static Action<object> stopLanding;
@@ -35,6 +39,10 @@ namespace KRPC.MechJeb
             deployChutes = type.Field<object, bool> ("DeployChutes");
             limitChutesStage = Bindings.EditableInt (type, "LimitChutesStage");
             rcsAdjustment = type.Field<object, bool> ("RCSAdjustment");
+            autowarp = type.Field<object, bool> ("Autowarp");
+            jettisonBeforeEntry = type.Field<object, bool> ("JettisonBeforeEntry");
+            limiterMinThrottle = type.Field<object, bool> ("LimiterMinThrottle");
+            minThrottle = Bindings.EditableDouble (type, "MinThrottle");
             landAtPositionTarget = type.Method<Action<object, object>> ("LandAtPositionTarget");
             landUntargeted = type.Method<Action<object, object>> ("LandUntargeted");
             stopLanding = type.Method<Action<object>> ("StopLanding");
@@ -151,13 +159,45 @@ namespace KRPC.MechJeb
         }
 
         /// <summary>
-        /// Whether to warp time during the landing.
+        /// Whether to warp time during the landing, and the burns it makes.
         /// </summary>
-        /// <remarks>The same setting as <see cref="ManeuverPlanner.Autowarp"/>.</remarks>
         [KRPCProperty]
         public bool Autowarp {
-            get { return NodeExecutor.Autowarp; }
-            set { NodeExecutor.Autowarp = value; }
+            get { return autowarp.Get (Instance); }
+            set { autowarp.Set (Instance, value); }
+        }
+
+        /// <summary>
+        /// Whether to drop the current stage just above the atmosphere, and aim for the parts
+        /// that land, such as a capsule without its service stage.
+        /// </summary>
+        [KRPCProperty]
+        public bool JettisonBeforeEntry {
+            get { return jettisonBeforeEntry.Get (Instance); }
+            set { jettisonBeforeEntry.Set (Instance, value); }
+        }
+
+        /// <summary>
+        /// Whether to keep the throttle above <see cref="MinThrottle"/> during the landing.
+        /// </summary>
+        /// <remarks>
+        /// The landing's own setting. The other throttle limits are those of
+        /// <see cref="Utilities.Thrust"/>.
+        /// </remarks>
+        [KRPCProperty]
+        public bool LimiterMinThrottle {
+            get { return limiterMinThrottle.Get (Instance); }
+            set { limiterMinThrottle.Set (Instance, value); }
+        }
+
+        /// <summary>
+        /// The smallest throttle during the landing, between 0 and 1.
+        /// </summary>
+        /// <remarks>Requires <see cref="LimiterMinThrottle"/>.</remarks>
+        [KRPCProperty]
+        public double MinThrottle {
+            get { return minThrottle.Get (Instance); }
+            set { minThrottle.Set (Instance, value); }
         }
 
         /// <summary>

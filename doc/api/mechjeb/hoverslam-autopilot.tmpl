@@ -1,0 +1,10 @@
+.. default-domain:: {{ domain.sphinxname }}
+.. highlight:: {{ domain.highlight }}
+{{ domain.currentmodule('MechJeb') }}
+{% import domain.macros as macros with context %}
+
+HoverslamAutopilot
+==================
+
+{{ macros.class(services['MechJeb'].classes['HoverslamAutopilot']) }}
+{{ macros.enumeration(services['MechJeb'].enumerations['HoverslamState']) }}

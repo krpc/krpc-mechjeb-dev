@@ -5,21 +5,17 @@ using KRPC.Utils;
 namespace KRPC.MechJeb.Maneuver
 {
     /// <summary>
-    /// An interplanetary transfer to the target body, at the departure that needs the least
-    /// delta-v before <see cref="MaxArrivalTime"/>.
+    /// An interplanetary transfer to the target body. The departure and transfer time come
+    /// from a search, chosen as <see cref="Mode"/> sets.
     /// </summary>
     /// <remarks>
-    /// MechJeb searches for the departure in the background. The first call to
-    /// <c>MakeNodes</c> starts the search, and throws an <see cref="OperationException"/>
-    /// until it finishes. See <see cref="Searching"/>.
+    /// MechJeb searches in the background. The first call to <c>MakeNodes</c> starts the
+    /// search, and throws an <see cref="OperationException"/> until it finishes. See
+    /// <see cref="Searching"/>.
     /// </remarks>
     [KRPCClass (Service = "MechJeb")]
     public sealed class OperationAdvancedTransfer : Operation
     {
-        // MechJeb's mode that searches up to the arrival time, rather than the porkchop plot
-        // its window selects a point on
-        const int limitedTime = 0;
-
         static Field<object, int> selectionMode;
         static Field<object, double> maxArrivalTime;
         static Field<object, bool> includeCaptureBurn;
@@ -32,6 +28,16 @@ namespace KRPC.MechJeb.Maneuver
         static Func<object, bool> finished;
         static Func<object, int> progress;
         static Field<object, bool> stop;
+        static Field<object, bool> targetInclinationFlag;
+        static Field<object, double> targetInclination;
+        static Func<object, bool> isFinished;
+        static Func<object, bool> hasFailed;
+        static Action<object> selectLowestDeltaV;
+        static Action<object> selectAsap;
+        static Func<object, double, double, bool> selectTimes;
+        static TryGetSelection tryGetSelection;
+
+        delegate bool TryGetSelection (object instance, out double departureTime, out double duration, out double deltaV);
 
         internal static new void Load ()
         {
@@ -49,6 +55,14 @@ namespace KRPC.MechJeb.Maneuver
             finished = calculator.Getter<object, bool> ("Finished");
             progress = calculator.Getter<object, int> ("Progress");
             stop = calculator.Field<object, bool> ("Stop");
+            targetInclinationFlag = type.Field<object, bool> ("TargetInclinationFlag");
+            targetInclination = Bindings.EditableDouble (type, "_targetInclination");
+            isFinished = type.Getter<object, bool> ("IsFinished");
+            hasFailed = type.Getter<object, bool> ("HasFailed");
+            selectLowestDeltaV = type.Method<Action<object>> ("SelectLowestDv");
+            selectAsap = type.Method<Action<object>> ("SelectAsap");
+            selectTimes = type.Method<Func<object, double, double, bool>> ("SelectTimes");
+            tryGetSelection = type.Method<TryGetSelection> ("TryGetSelection");
         }
 
         // The target orbit that MaxArrivalTime was set or computed for
@@ -62,8 +76,9 @@ namespace KRPC.MechJeb.Maneuver
         /// The latest arrival time, as a time from now, in seconds.
         /// </summary>
         /// <remarks>
-        /// <c>MakeNodes</c> computes a default for a new target, from the synodic period and the
-        /// transfer time, unless it was set while the target was selected.
+        /// Applies in the <see cref="AdvancedTransferMode.LimitedTime"/> mode. <c>MakeNodes</c>
+        /// computes a default for a new target, from the synodic period and the transfer time,
+        /// unless it was set while the target was selected.
         /// </remarks>
         [KRPCProperty]
         public double MaxArrivalTime {
@@ -139,6 +154,135 @@ namespace KRPC.MechJeb.Maneuver
             }
         }
 
+        /// <summary>
+        /// How the search chooses the departure and transfer time.
+        /// </summary>
+        /// <remarks>
+        /// Setting it stops a search, so the next <c>MakeNodes</c> starts one.
+        /// </remarks>
+        [KRPCProperty]
+        public AdvancedTransferMode Mode {
+            get { return (AdvancedTransferMode)selectionMode.Get (Instance); }
+            set {
+                var instance = Instance;
+                if (selectionMode.Get (instance) != (int)value)
+                    StopSearch (instance);
+                selectionMode.Set (instance, (int)value);
+            }
+        }
+
+        /// <summary>
+        /// Whether to aim for <see cref="TargetInclination"/> at the target.
+        /// </summary>
+        [KRPCProperty]
+        public bool TargetInclinationFlag {
+            get { return targetInclinationFlag.Get (Instance); }
+            set { targetInclinationFlag.Set (Instance, value); }
+        }
+
+        /// <summary>
+        /// The inclination of the orbit at the target, in degrees.
+        /// </summary>
+        /// <remarks>Requires <see cref="TargetInclinationFlag"/>.</remarks>
+        [KRPCProperty]
+        public double TargetInclination {
+            get { return targetInclination.Get (Instance); }
+            set { targetInclination.Set (Instance, value); }
+        }
+
+        /// <summary>
+        /// Whether the search finished and found no transfer.
+        /// </summary>
+        [KRPCProperty]
+        public bool SearchFailed {
+            get { return hasFailed (Instance); }
+        }
+
+        void CheckPorkchop (object instance)
+        {
+            if (Mode != AdvancedTransferMode.Porkchop)
+                throw new InvalidOperationException ("The mode is not porkchop");
+            if (!isFinished (instance))
+                throw new InvalidOperationException ("The search has not finished");
+        }
+
+        /// <summary>
+        /// Select the departure and transfer time that need the least delta-v. The search
+        /// selects them when it finishes. Throws an exception if <see cref="Mode"/> is not
+        /// <see cref="AdvancedTransferMode.Porkchop"/>, or the search has not finished.
+        /// </summary>
+        [KRPCMethod]
+        public void SelectLowestDeltaV ()
+        {
+            var instance = Instance;
+            CheckPorkchop (instance);
+            selectLowestDeltaV (instance);
+        }
+
+        /// <summary>
+        /// Select the earliest departure, with the transfer time that needs the least delta-v
+        /// for it. Throws an exception if <see cref="Mode"/> is not
+        /// <see cref="AdvancedTransferMode.Porkchop"/>, or the search has not finished.
+        /// </summary>
+        [KRPCMethod]
+        public void SelectAsap ()
+        {
+            var instance = Instance;
+            CheckPorkchop (instance);
+            selectAsap (instance);
+        }
+
+        /// <summary>
+        /// Select the departure and transfer time nearest the given ones. Throws an exception
+        /// if <see cref="Mode"/> is not <see cref="AdvancedTransferMode.Porkchop"/>, the search
+        /// has not finished, or there is no transfer near those times.
+        /// </summary>
+        /// <param name="departureTime">The universal time of the departure, in seconds.</param>
+        /// <param name="duration">The transfer time, in seconds.</param>
+        [KRPCMethod]
+        public void Select (double departureTime, double duration)
+        {
+            var instance = Instance;
+            CheckPorkchop (instance);
+            if (!selectTimes (instance, departureTime, duration))
+                throw new ArgumentException ("There is no transfer at those times");
+        }
+
+        /// <summary>
+        /// The universal time of the selected departure, in seconds. Throws an exception if the
+        /// search has not finished.
+        /// </summary>
+        [KRPCProperty]
+        public double SelectedDepartureTime {
+            get { return Selection ().Item1; }
+        }
+
+        /// <summary>
+        /// The selected transfer time, in seconds. Throws an exception if the search has not
+        /// finished.
+        /// </summary>
+        [KRPCProperty]
+        public double SelectedDuration {
+            get { return Selection ().Item2; }
+        }
+
+        /// <summary>
+        /// The delta-v of the selected transfer that the search estimates, in <unit>m/s</unit>.
+        /// Throws an exception if the search has not finished.
+        /// </summary>
+        [KRPCProperty]
+        public double SelectedDeltaV {
+            get { return Selection ().Item3; }
+        }
+
+        Tuple<double, double, double> Selection ()
+        {
+            double departureTime, duration, deltaV;
+            if (!tryGetSelection (Instance, out departureTime, out duration, out deltaV))
+                throw new InvalidOperationException ("The search has not finished");
+            return Tuple.Create (departureTime, duration, deltaV);
+        }
+
         // Stop the search, so the next MakeNodes starts one with the current settings. MechJeb's
         // window does this on any change to its settings, and we do it on a change to a
         // setting the search reads.
@@ -162,7 +306,6 @@ namespace KRPC.MechJeb.Maneuver
                 periapsisHeight.Set (instance, defaultPeriapsis (body));
                 lastTargetCelestial.Set (instance, body);
             }
-            selectionMode.Set (instance, limitedTime);
             var targetController = MechJeb.TargetController;
             var target = targetController.InternalTargetOrbit;
             // A search from another orbit, or to another target, is restarted, as in MechJeb's window
@@ -179,5 +322,25 @@ namespace KRPC.MechJeb.Maneuver
             arrivalTarget = target;
             throw new OperationException (error ?? "Started computation");
         }
+    }
+
+    /// <summary>
+    /// How the advanced transfer chooses the departure and transfer time. See
+    /// <see cref="OperationAdvancedTransfer.Mode"/>.
+    /// </summary>
+    [KRPCEnum (Service = "MechJeb")]
+    public enum AdvancedTransferMode
+    {
+        /// <summary>
+        /// The transfer that needs the least delta-v and arrives before
+        /// <see cref="OperationAdvancedTransfer.MaxArrivalTime"/>.
+        /// </summary>
+        LimitedTime,
+
+        /// <summary>
+        /// A transfer from a grid of departures and transfer times, the porkchop plot of
+        /// MechJeb's window. The one that needs the least delta-v, unless another is selected.
+        /// </summary>
+        Porkchop
     }
 }

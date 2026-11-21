@@ -32,6 +32,7 @@ namespace KRPC.MechJeb
         readonly OperationPlane operationPlane = new OperationPlane ();
         readonly OperationResonantOrbit operationResonantOrbit = new OperationResonantOrbit ();
         readonly OperationSemiMajor operationSemiMajor = new OperationSemiMajor ();
+        readonly OperationStationaryOrbit operationStationaryOrbit = new OperationStationaryOrbit ();
         readonly OperationTransfer operationTransfer = new OperationTransfer ();
 
         internal static void Load ()
@@ -185,6 +186,14 @@ namespace KRPC.MechJeb
         }
 
         /// <summary>
+        /// The operation that transfers to the stationary orbit of the body.
+        /// </summary>
+        [KRPCProperty]
+        public OperationStationaryOrbit OperationStationaryOrbit {
+            get { return operationStationaryOrbit; }
+        }
+
+        /// <summary>
         /// The operation that transfers to the target.
         /// </summary>
         [KRPCProperty]
@@ -233,8 +242,7 @@ namespace KRPC.MechJeb
         /// Whether to warp time to the burn.
         /// </summary>
         /// <remarks>
-        /// The same setting as <see cref="LandingGuidance.Autowarp"/> and
-        /// <see cref="RendezvousAutopilot.Autowarp"/>.
+        /// The same setting as <see cref="RendezvousAutopilot.Autowarp"/>.
         /// </remarks>
         [KRPCProperty]
         public bool Autowarp {
@@ -249,6 +257,38 @@ namespace KRPC.MechJeb
         public double LeadTime {
             get { return NodeExecutor.LeadTime; }
             set { NodeExecutor.LeadTime = value; }
+        }
+
+        /// <summary>
+        /// The time before the burn at which the first, coarse time warp stops, in seconds.
+        /// </summary>
+        /// <remarks>
+        /// A burn further away than this is warped to in two steps: to this time before it,
+        /// then to <see cref="LeadTime"/> once the vessel is aligned.
+        /// </remarks>
+        [KRPCProperty]
+        public double InitialWarpLeadTime {
+            get { return NodeExecutor.InitialWarpLeadTime; }
+            set { NodeExecutor.InitialWarpLeadTime = value; }
+        }
+
+        /// <summary>
+        /// The angle from the burn direction within which the burn starts, in degrees.
+        /// </summary>
+        [KRPCProperty]
+        public double AlignedTolerance {
+            get { return NodeExecutor.AlignedTolerance; }
+            set { NodeExecutor.AlignedTolerance = value; }
+        }
+
+        /// <summary>
+        /// The angle from the burn direction within which time warp to the burn starts, in
+        /// degrees.
+        /// </summary>
+        [KRPCProperty]
+        public double WarpAlignedTolerance {
+            get { return NodeExecutor.WarpAlignedTolerance; }
+            set { NodeExecutor.WarpAlignedTolerance = value; }
         }
 
         /// <summary>
