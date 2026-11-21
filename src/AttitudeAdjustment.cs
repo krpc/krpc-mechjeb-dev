@@ -18,8 +18,8 @@ namespace KRPC.MechJeb
         internal static new void Load ()
         {
             var type = Bindings.Type ("MuMech.MechJebModuleAttitudeController");
-            rcsAuto = type.Field<object, bool> ("RCS_auto");
-            activeController = type.Field<object, int> ("activeController");
+            rcsAuto = type.Field<object, bool> ("RCSAuto");
+            activeController = type.Field<object, int> ("ActiveController");
             setActiveController = type.Method<Action<object, int>> ("SetActiveController");
         }
 

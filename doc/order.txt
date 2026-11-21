@@ -331,7 +331,7 @@ MechJeb.OperationTransfer.ErrorMessage
 MechJeb.OperationTransfer.MakeNodes
 MechJeb.OperationTransfer.Capture
 MechJeb.OperationTransfer.PlanCapture
-MechJeb.OperationTransfer.Rendezvous
+MechJeb.OperationTransfer.MatchOrbit
 MechJeb.OperationTransfer.LagTime
 MechJeb.OperationTransfer.Coplanar
 MechJeb.OperationTransfer.TimeSelector

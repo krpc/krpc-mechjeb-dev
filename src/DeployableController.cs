@@ -18,7 +18,7 @@ namespace KRPC.MechJeb
         internal static new void Load ()
         {
             var type = Bindings.Type ("MuMech.MechJebModuleDeployableController");
-            autoDeploy = type.Field<object, bool> ("autoDeploy");
+            autoDeploy = type.Field<object, bool> ("AutoDeploy");
             extendAll = type.Method<Action<object>> ("ExtendAll");
             retractAll = type.Method<Action<object>> ("RetractAll");
             allRetracted = type.Method<Func<object, bool>> ("AllRetracted");
@@ -49,6 +49,9 @@ namespace KRPC.MechJeb
         /// <summary>
         /// Retract all the parts.
         /// </summary>
+        /// <remarks>
+        /// Parts that are still extending are left extended.
+        /// </remarks>
         [KRPCMethod]
         public void RetractAll ()
         {

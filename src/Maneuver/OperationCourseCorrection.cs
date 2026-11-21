@@ -9,13 +9,13 @@ namespace KRPC.MechJeb.Maneuver
     [KRPCClass (Service = "MechJeb")]
     public sealed class OperationCourseCorrection : Operation
     {
-        static Field<object, double> courseCorrectFinalPeA;
+        static Field<object, double> periapsis;
         static Field<object, double> interceptDistance;
 
         internal static new void Load ()
         {
             var type = Bindings.Type ("MuMech.OperationCourseCorrection");
-            courseCorrectFinalPeA = Bindings.EditableDouble (type, "CourseCorrectFinalPeA");
+            periapsis = Bindings.EditableDouble (type, "Periapsis");
             interceptDistance = Bindings.EditableDouble (type, "InterceptDistance");
         }
 
@@ -28,8 +28,8 @@ namespace KRPC.MechJeb.Maneuver
         /// </summary>
         [KRPCProperty]
         public double FinalPeriapsisAltitude {
-            get { return courseCorrectFinalPeA.Get (Instance); }
-            set { courseCorrectFinalPeA.Set (Instance, value); }
+            get { return periapsis.Get (Instance); }
+            set { periapsis.Set (Instance, value); }
         }
 
         /// <summary>

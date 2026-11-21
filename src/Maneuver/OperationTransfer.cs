@@ -18,7 +18,7 @@ namespace KRPC.MechJeb.Maneuver
         static Func<object, object> timeSelector;
         static Field<object, bool> capture;
         static Field<object, bool> planCapture;
-        static Field<object, bool> rendezvous;
+        static Field<object, bool> matchOrbit;
         static Field<object, double> lagTime;
         static Field<object, bool> coplanar;
 
@@ -28,7 +28,7 @@ namespace KRPC.MechJeb.Maneuver
             timeSelector = TimeSelectorField (type);
             capture = type.Field<object, bool> ("Capture");
             planCapture = type.Field<object, bool> ("PlanCapture");
-            rendezvous = type.Field<object, bool> ("Rendezvous");
+            matchOrbit = type.Field<object, bool> ("MatchOrbit");
             lagTime = Bindings.EditableDouble (type, "LagTime");
             coplanar = type.Field<object, bool> ("Coplanar");
         }
@@ -54,7 +54,10 @@ namespace KRPC.MechJeb.Maneuver
         /// <summary>
         /// Whether to make a second node for the capture burn.
         /// </summary>
-        /// <remarks>Requires <see cref="Capture"/>.</remarks>
+        /// <remarks>
+        /// Requires <see cref="Capture"/>. For a celestial body target, also requires
+        /// <see cref="MatchOrbit"/> or a <see cref="LagTime"/>.
+        /// </remarks>
         [KRPCProperty]
         public bool PlanCapture {
             get { return planCapture.Get (Instance); }
@@ -62,18 +65,20 @@ namespace KRPC.MechJeb.Maneuver
         }
 
         /// <summary>
-        /// Whether to meet the target, rather than reach its orbit.
+        /// Whether to reach the target's orbit, ahead of or behind the target, rather than
+        /// meet the target.
         /// </summary>
+        /// <remarks>Requires <see cref="Capture"/>.</remarks>
         [KRPCProperty]
-        public bool Rendezvous {
-            get { return rendezvous.Get (Instance); }
-            set { rendezvous.Set (Instance, value); }
+        public bool MatchOrbit {
+            get { return matchOrbit.Get (Instance); }
+            set { matchOrbit.Set (Instance, value); }
         }
 
         /// <summary>
         /// The time by which the vessel arrives behind the target, in seconds.
         /// </summary>
-        /// <remarks>Requires <see cref="Rendezvous"/>.</remarks>
+        /// <remarks>Ignored with <see cref="MatchOrbit"/>.</remarks>
         [KRPCProperty]
         public double LagTime {
             get { return lagTime.Get (Instance); }

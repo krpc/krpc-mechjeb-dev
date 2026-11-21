@@ -43,7 +43,7 @@ class TestManeuverPlanner(MechJebTestCase):
                 (planner.operation_semi_major, "new_semi_major_axis", 1234000),
                 (planner.operation_transfer, "capture", False),
                 (planner.operation_transfer, "plan_capture", False),
-                (planner.operation_transfer, "rendezvous", False),
+                (planner.operation_transfer, "match_orbit", True),
                 (planner.operation_transfer, "lag_time", 12),
                 (planner.operation_transfer, "coplanar", True),
                 (planner, "autowarp", False),
@@ -275,7 +275,7 @@ class TestManeuverPlannerTransferToVessel(MechJebTestCase):
         operation = self.planner.operation_transfer
         operation.time_selector.time_reference = self.mj.TimeReference.computed
         self.assertTrue(operation.capture)
-        self.assertTrue(operation.rendezvous)
+        self.assertFalse(operation.match_orbit)
         operation.plan_capture = True
         nodes = operation.make_nodes()
         self.assertEqual("", operation.error_message)

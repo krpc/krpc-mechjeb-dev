@@ -26,29 +26,29 @@ namespace KRPC.MechJeb.Maneuver
         static Field<object, double> periapsisHeight;
         static Field<object, object> worker;
         static Field<object, global::CelestialBody> lastTargetCelestial;
-        static Action<object, global::Orbit, global::Orbit, double> computeTimes;
+        static Func<object, global::Orbit, double, object, double?, double?, double?, double?, double?, string> compute;
+        static Func<object, global::Orbit, global::Orbit, bool> isStale;
+        static Func<global::CelestialBody, double> defaultPeriapsis;
         static Func<object, bool> finished;
         static Func<object, int> progress;
         static Field<object, bool> stop;
-        static Func<object, global::Orbit> originOrbit;
-        static Func<object, global::Orbit> destinationOrbit;
 
         internal static new void Load ()
         {
             var type = Bindings.Type ("MuMech.OperationAdvancedTransfer");
-            selectionMode = type.Field<object, int> ("selectionMode");
-            maxArrivalTime = Bindings.EditableDouble (type, "maxArrivalTime");
-            includeCaptureBurn = type.Field<object, bool> ("includeCaptureBurn");
-            periapsisHeight = Bindings.EditableDouble (type, "periapsisHeight");
-            worker = type.Field<object, object> ("worker");
-            lastTargetCelestial = type.Field<object, global::CelestialBody> ("lastTargetCelestial");
-            computeTimes = type.Method<Action<object, global::Orbit, global::Orbit, double>> ("ComputeTimes");
+            selectionMode = type.Field<object, int> ("_selectionMode");
+            maxArrivalTime = Bindings.EditableDouble (type, "MaxArrivalTime");
+            includeCaptureBurn = type.Field<object, bool> ("_includeCaptureBurn");
+            periapsisHeight = Bindings.EditableDouble (type, "_periapsisHeight");
+            worker = type.Field<object, object> ("_worker");
+            lastTargetCelestial = type.Field<object, global::CelestialBody> ("_lastTargetCelestial");
+            compute = type.Method<Func<object, global::Orbit, double, object, double?, double?, double?, double?, double?, string>> ("Compute");
+            isStale = type.Method<Func<object, global::Orbit, global::Orbit, bool>> ("IsStale");
+            defaultPeriapsis = type.Method<Func<global::CelestialBody, double>> ("DefaultPeriapsisKm");
             var calculator = Bindings.Type ("MuMech.TransferCalculator");
             finished = calculator.Getter<object, bool> ("Finished");
             progress = calculator.Getter<object, int> ("Progress");
             stop = calculator.Field<object, bool> ("Stop");
-            originOrbit = calculator.Getter<object, global::Orbit> ("OriginOrbit");
-            destinationOrbit = calculator.Getter<object, global::Orbit> ("DestinationOrbit");
         }
 
         // The target orbit that MaxArrivalTime was set or computed for
@@ -159,19 +159,25 @@ namespace KRPC.MechJeb.Maneuver
             if (body == null)
                 throw new OperationException ("The target must be a celestial body");
             if (lastTargetCelestial.Get (instance) != body) {
-                periapsisHeight.Set (instance, body.atmosphere ? body.atmosphereDepth / 1000d + 10d : 100d);
+                periapsisHeight.Set (instance, defaultPeriapsis (body));
                 lastTargetCelestial.Set (instance, body);
             }
             selectionMode.Set (instance, limitedTime);
-            var target = MechJeb.TargetController.InternalTargetOrbit;
-            var calculator = worker.Get (instance);
+            var targetController = MechJeb.TargetController;
+            var target = targetController.InternalTargetOrbit;
             // A search from another orbit, or to another target, is restarted, as in MechJeb's window
-            if (calculator != null && (originOrbit (calculator) != orbit || destinationOrbit (calculator) != target))
+            if (isStale (instance, orbit, target))
                 StopSearch (instance);
-            if (target != arrivalTarget) {
-                computeTimes (instance, orbit, target, time);
-                arrivalTarget = target;
-            }
+            if (worker.Get (instance) != null)
+                return;
+            // MechJeb's Compute sets the default arrival time, unless given one. We give the
+            // one set for this target.
+            double? arrival = null;
+            if (target == arrivalTarget)
+                arrival = maxArrivalTime.Get (instance);
+            var error = compute (instance, orbit, time, targetController.Instance, null, null, null, null, arrival);
+            arrivalTarget = target;
+            throw new OperationException (error ?? "Started computation");
         }
     }
 }

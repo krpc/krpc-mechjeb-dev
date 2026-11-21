@@ -30,7 +30,7 @@ class TestUtilities(MechJebTestCase):
                 (thrust, "max_acceleration", 12),
                 (thrust, "limit_throttle", True),
                 (thrust, "max_throttle", 0.5),
-                (thrust, "limiter_min_throttle", False),
+                (thrust, "limiter_min_throttle", True),
                 (thrust, "min_throttle", 0.25),
                 (thrust, "limit_to_prevent_flameout", True),
                 (thrust, "flameout_safety_pct", 12),
@@ -72,7 +72,9 @@ class TestUtilities(MechJebTestCase):
         controller = self.mj.utilities.solar_panels
         self.assertTrue(controller.all_retracted())
         controller.extend_all()
-        self.wait_until(lambda: not controller.all_retracted())
+        panels = [p for p in self.vessel.parts.solar_panels if p.deployable]
+        deployed = self.sc.DeployableState.deployed
+        self.wait_until(lambda: all(p.state == deployed for p in panels), timeout=60)
         controller.retract_all()
         self.wait_until(controller.all_retracted, timeout=60)
 

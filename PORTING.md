@@ -1,7 +1,7 @@
 # Port to MechJeb 2.16
 
-The work list for the port, from the first test runs on 2026-11-21. Remove each entry as it is
-ported.
+The work list for the port, from the test runs against dev-2.16.0.0-2120. Remove each entry as it
+is ported.
 
 ## Baseline
 
@@ -10,27 +10,32 @@ kRPC v0.8.0's service, built here with `dotnet`, against MechJeb 2.15.4.0
 `TestManeuverPlannerInOrbit.test_advanced_transfer` failed once, with MechJeb's
 `PlaceManeuverNode: bad dV: [NaN, NaN, NaN]`, and passed on its own.
 
-## Against dev-2.16.0.0-2120
+## To Port
 
-70 members fail to bind (`test_bindings.py`). 14 other tests and 85 subtests fail, all but three
-on one of those members. The tests of the docking, landing, rendezvous and rover autopilots,
-Smart A.S.S., the target controller and Translatron pass.
+54 members fail to bind (`test_bindings.py`), down from 70 at the start.
 
 | Area | Missing in the dev build | Failing tests |
 | --- | --- | --- |
 | Aircraft autopilot | `MechJebModuleAirplaneAutopilot` | `AircraftAutopilot` settings (27) |
 | Aircraft approach | `MechJebModuleSpaceplaneAutopilot`, `Runway` | `test_autoland`, `test_runways`, settings (5) |
 | Ascent | `MechJebModuleAscentBaseAutopilot` (2 bindings), `MechJebModuleGuidanceController`, `MechJebModuleAscentMenu.TimeToPhaseAngle`, 46 members of `MechJebModuleAscentSettings` | 7 of 9 ascent tests, settings of `AscentGuidance`, `AscentSettings`, `ClassicPath`, `PVGSettings` (40) |
-| Attitude | `MechJebModuleAttitudeController.RCS_auto`, `.activeController` | `test_default_controller`, settings (2) |
-| Utilities | `MechJebModuleDeployableController.autoDeploy` | settings (2) |
-| Maneuver planner | `OperationAdvancedTransfer` (6 members), `OperationInterplanetaryTransfer`, `OperationGeneric.Rendezvous`, `OperationCourseCorrection.CourseCorrectFinalPeA`, `OperationMoonReturn.MoonReturnAltitude` | `test_advanced_transfer`, `test_transfer_without_capture`, `test_transfer_with_capture`, settings (7) |
-| Vessel state | `VesselState.time`, `.latitude`, `.longitude`, `.celestialLongitude` | None directly |
+| Interplanetary transfer | `OperationInterplanetaryTransfer`, removed in MechJeb | `OperationInterplanetaryTransfer` setting (1) |
 
-The three failures with every member bound:
+## Upstream
 
-* `SmartRCS.rcs_throttle` and `ThrustLimiter.limiter_min_throttle` now default to false, the value
-  the setting tests set.
-* `test_solar_panels`: the panels extend, but `all_retracted` stays false for 60 s after
-  `retract_all`.
+* `OperationTransfer` with `Capture` off makes a node with no encounter.
+  `test_transfer_without_capture` fails. MechJeb's "Flyby/Impact" mode passes `rendezvous: false`
+  to `DeltaVAndTimeForHohmannTransfer` (`Capture && !MatchOrbit`), so the burn reaches the
+  target's orbit but not the target. 2.15 passed `Rendezvous`, true by default.
 
-`build/dev.log` from `pytest -v -rfE` has each error.
+## New in 2.16
+
+Members the service could add once the port is done:
+
+* `Inclination` and `InclinationFlag` on `OperationCourseCorrection` and `OperationMoonReturn`.
+* `OperationAdvancedTransfer`: the porkchop mode, through `Compute`, `SelectTimes` and
+  `TryGetSelection`, and the target inclination.
+* `OperationStationaryOrbit`, a new operation.
+* Per-autopilot throttle limits, `IThrustLimits` through `MechJebModuleThrustController.Limits`.
+
+`build/dev-step1.log` from `pytest -v -rfE` has each error.

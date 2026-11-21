@@ -18,11 +18,10 @@ namespace KRPC.MechJeb
         {
             instance = core.Getter<object, object> ("VesselState");
             var type = Bindings.Type ("MuMech.VesselState");
-            time = type.Getter<object, double> ("time");
-            // Moving averages, which convert to their value
-            celestialLongitude = type.Getter<object, double> ("celestialLongitude");
-            latitude = type.Getter<object, double> ("latitude");
-            longitude = type.Getter<object, double> ("longitude");
+            time = type.Getter<object, double> ("Time");
+            celestialLongitude = type.Getter<object, double> ("CelestialLongitude");
+            latitude = type.Getter<object, double> ("Latitude");
+            longitude = type.Getter<object, double> ("Longitude");
         }
 
         static object Instance {

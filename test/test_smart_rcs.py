@@ -9,7 +9,7 @@ class TestSmartRCS(MechJebTestCase):
         self.assert_settings(
             [
                 (mj.smart_rcs, "auto_disable_smart_rcs", False),
-                (mj.smart_rcs, "rcs_throttle", False),
+                (mj.smart_rcs, "rcs_throttle", True),
                 (mj.smart_rcs, "rcs_for_rotation", False),
             ]
         )
