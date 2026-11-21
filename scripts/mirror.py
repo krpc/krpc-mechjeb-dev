@@ -16,7 +16,8 @@ import fetch
 def main():
     pin = fetch.pins()["mechjeb"]
     build = os.path.join(build_service.BUILD, "MechJeb2-%s.zip" % pin["version"])
-    shutil.copy(fetch.fetch("mechjeb", pin), build)
+    # From upstream, as the mirror is what this makes
+    shutil.copy(fetch.fetch("mechjeb", dict(pin, url=pin["upstream"])), build)
     source = os.path.join(
         build_service.BUILD, "MechJeb2-%s-source.zip" % pin["version"]
     )

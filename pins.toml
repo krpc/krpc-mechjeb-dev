@@ -13,9 +13,12 @@ sha256 = "eb0ad5ce0d2007d0060f4812c633596d7d6e28205dcdd0892253f43b37ef55f1"
 url = "https://github.com/krpc/ksp-lib/raw/7237faba90e2817771a731763099ef6fdbcd666a/ksp/ksp-1.12.5.zip"
 sha256 = "e3de286fd4bf2993e23cc996a8fe3426aa575ea0a296376b43dd2fe289826ad8"
 
-# The MechJeb dev build the service binds to
+# The MechJeb dev build the service binds to, from the release that mirrors it, as MechJeb
+# deletes old dev builds. The commit is the build's source, which scripts/mirror.py adds to a
+# release with the build from upstream.
 [mechjeb]
 version = "dev-2.16.0.0-2120"
 commit = "f957bee55f226bd31f3370a467254fdc33c74f44"
-url = "https://github.com/MuMech/MechJeb2/releases/download/dev-2.16.0.0-2120/MechJeb2-dev-2.16.0.0-2120.zip"
+url = "https://github.com/krpc/krpc-mechjeb-dev/releases/download/v1.0.0/MechJeb2-dev-2.16.0.0-2120.zip"
+upstream = "https://github.com/MuMech/MechJeb2/releases/download/dev-2.16.0.0-2120/MechJeb2-dev-2.16.0.0-2120.zip"
 sha256 = "60bc51877dd89389a16238306c86c3f0d5fb996cdb240a80d894330bf9306580"
