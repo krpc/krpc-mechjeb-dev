@@ -33,7 +33,8 @@ python -m venv .venv
 `scripts/build_service.py` builds the service against them.
 
 `scripts/stubs.py` generates the client stubs into `build/stubs`, and an archive of each for the
-release. `scripts/docs.py` builds the docs into `build/doc/html`, with the tools in
+release. `scripts/mirror.py` puts the pinned MechJeb build and its source into `build/`, for
+the release to carry, as MechJeb deletes old dev builds. `scripts/docs.py` builds the docs into `build/doc/html`, with the tools in
 `doc/requirements.txt`.
 
 ## Test
