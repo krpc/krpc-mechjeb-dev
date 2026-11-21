@@ -44,7 +44,18 @@ def servicedefs():
 
 def build():
     subprocess.check_call(
-        ["dotnet", "build", PROJECT, "-c", "Release", "-o", BIN, "-nologo", "-v", "quiet"]
+        [
+            "dotnet",
+            "build",
+            PROJECT,
+            "-c",
+            "Release",
+            "-o",
+            BIN,
+            "-nologo",
+            "-v",
+            "quiet",
+        ]
     )
     subprocess.check_call(
         [

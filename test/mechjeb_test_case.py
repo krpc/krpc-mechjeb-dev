@@ -1,21 +1,14 @@
 """The base classes of the MechJeb tests.
 
-This file is not named test_* so pytest does not collect it. The test modules import it by
-its fully-qualified name, as service.SpaceCenter.test.resources_equivalence is imported.
+This file is not named test_* so pytest does not collect it. pytest puts this directory on
+sys.path, so the test modules import it by its name.
 """
 
 import os
 
 from krpctools.game.ksp import TestCase
 
-CRAFT = os.path.join(
-    os.path.dirname(os.path.abspath(__file__)),
-    "..",
-    "..",
-    "SpaceCenter",
-    "test",
-    "craft",
-)
+CRAFT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "craft")
 
 
 class MechJebTestCase(TestCase):

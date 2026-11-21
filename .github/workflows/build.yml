@@ -17,7 +17,7 @@ jobs:
         with:
           python-version: "3.14"
       - run: pip install -r requirements.txt
-      - run: python scripts/build.py
+      - run: python scripts/build_service.py
       - uses: actions/upload-artifact@v4
         with:
           name: krpc-mechjeb-dev

@@ -2,7 +2,7 @@ import math
 import unittest
 
 from krpctools.game.geometry import norm
-from service.MechJeb.test.mechjeb_test_case import (
+from mechjeb_test_case import (
     CRAFT,
     MechJebInOrbitTestCase,
     MechJebTestCase,

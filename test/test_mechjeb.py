@@ -1,7 +1,7 @@
 import unittest
 
 from krpctools.game.ksp import TestCase
-from service.MechJeb.test.mechjeb_test_case import MechJebTestCase
+from mechjeb_test_case import MechJebTestCase
 
 
 class TestMechJeb(MechJebTestCase):

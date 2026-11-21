@@ -40,7 +40,10 @@ def fetch(name, pin):
         digest = sha256(partial)
         if digest != pin["sha256"]:
             os.remove(partial)
-            sys.exit("%s has sha256 %s, pins.toml gives %s" % (pin["url"], digest, pin["sha256"]))
+            sys.exit(
+                "%s has sha256 %s, pins.toml gives %s"
+                % (pin["url"], digest, pin["sha256"])
+            )
         os.replace(partial, archive)
     directory = os.path.join(DEPS, name)
     shutil.rmtree(directory, ignore_errors=True)

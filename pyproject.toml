@@ -4,3 +4,22 @@ addopts = ["-p", "krpctools.game.pytest_plugin"]
 
 [tool.pyright]
 extraPaths = ["scripts", "test"]
+venvPath = "."
+venv = ".venv"
+typeCheckingMode = "standard"
+pythonVersion = "3.14"
+
+# kRPC's rules, from its ruff.toml
+[tool.ruff]
+target-version = "py314"
+line-length = 88
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "PLE", "PLW", "PLR"]
+ignore = ["E501", "UP031", "UP032", "B905", "PLR2004", "PLW2901", "PLR0917"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["krpc", "krpctools", "mechjeb_test_case", "build_service", "fetch"]
+
+[tool.ruff.lint.per-file-ignores]
+"test/*.py" = ["B018"]

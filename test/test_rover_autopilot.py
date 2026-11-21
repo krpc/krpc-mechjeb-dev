@@ -1,6 +1,6 @@
 import unittest
 
-from service.MechJeb.test.mechjeb_test_case import MechJebTestCase
+from mechjeb_test_case import MechJebTestCase
 
 
 class TestRoverAutopilot(MechJebTestCase):

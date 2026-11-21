@@ -21,11 +21,11 @@ Needs the .NET 10 SDK and Python 3.14:
 ```
 python -m venv .venv
 .venv/bin/pip install -r requirements.txt
-.venv/bin/python scripts/build.py
+.venv/bin/python scripts/build_service.py
 ```
 
 `scripts/fetch.py` downloads the releases in `pins.toml` into `build/deps`, and
-`scripts/build.py` builds the service against them.
+`scripts/build_service.py` builds the service against them.
 
 ## Test
 
@@ -35,6 +35,10 @@ The tests drive KSP 1.12.5, through `krpctools.game`. They install the MechJeb d
 ```
 KSP_DIR=/path/to/KSP .venv/bin/pytest test/test_smart_ass.py
 ```
+
+Each run builds the service first. `test/test_bindings.py` lists the MechJeb members the service
+fails to bind, and the other tests run with those members missing. `--mechjeb=release` tests
+against the MechJeb release kRPC pins in place of the dev build.
 
 ## Source
 
