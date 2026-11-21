@@ -1,0 +1,6 @@
+[tool.pytest.ini_options]
+testpaths = ["test"]
+addopts = ["-p", "krpctools.game.pytest_plugin"]
+
+[tool.pyright]
+extraPaths = ["scripts", "test"]

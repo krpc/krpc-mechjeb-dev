@@ -1,0 +1,3 @@
+# kRPC's tools and Python client, at the kRPC release in pins.toml
+krpc==0.8.0
+krpctools==0.8.0
