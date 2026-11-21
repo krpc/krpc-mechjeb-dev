@@ -1,7 +1,9 @@
 """Download and extract the releases in pins.toml into build/deps.
 
 build/deps/<name>.zip is the archive, checked against its sha256, and build/deps/<name>/ its
-contents. An archive already there with the right digest is not downloaded again.
+contents. An archive already there with the right digest is not downloaded again. A pin with
+an upstream URL falls back to it while its own URL is missing, as the mirror of a new MechJeb
+build exists only once its release is published.
 """
 
 import hashlib
@@ -9,6 +11,7 @@ import os
 import shutil
 import sys
 import tomllib
+import urllib.error
 import urllib.request
 import zipfile
 
@@ -29,20 +32,39 @@ def sha256(path):
     return digest.hexdigest()
 
 
+def get(url, path):
+    print("downloading", url)
+    with urllib.request.urlopen(url, timeout=60) as response:
+        with open(path, "wb") as f:
+            shutil.copyfileobj(response, f)
+    return url
+
+
+def download(pin, path):
+    """Download a pin to path, from its URL or else its upstream URL. Returns the URL used."""
+    urls = [pin["url"]]
+    if pin.get("upstream", pin["url"]) != pin["url"]:
+        urls.append(pin["upstream"])
+    for url in urls[:-1]:
+        try:
+            return get(url, path)
+        except urllib.error.HTTPError as e:
+            if e.code != 404:
+                raise
+            print(url, "not found")
+    return get(urls[-1], path)
+
+
 def fetch(name, pin):
     archive = os.path.join(DEPS, name + ".zip")
     if not os.path.exists(archive) or sha256(archive) != pin["sha256"]:
-        print("downloading", pin["url"])
         partial = archive + ".part"
-        with urllib.request.urlopen(pin["url"], timeout=60) as response:
-            with open(partial, "wb") as f:
-                shutil.copyfileobj(response, f)
+        url = download(pin, partial)
         digest = sha256(partial)
         if digest != pin["sha256"]:
             os.remove(partial)
             sys.exit(
-                "%s has sha256 %s, pins.toml gives %s"
-                % (pin["url"], digest, pin["sha256"])
+                "%s has sha256 %s, pins.toml gives %s" % (url, digest, pin["sha256"])
             )
         os.replace(partial, archive)
     directory = os.path.join(DEPS, name)

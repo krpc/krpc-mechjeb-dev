@@ -20,10 +20,13 @@ service.
 
 ## Upstream
 
-* `OperationTransfer` with `Capture` off makes a node with no encounter.
-  `test_transfer_without_capture` fails. MechJeb's "Flyby/Impact" mode passes `rendezvous: false`
-  to `DeltaVAndTimeForHohmannTransfer` (`Capture && !MatchOrbit`), so the burn reaches the
-  target's orbit but not the target. 2.15 passed `Rendezvous`, true by default.
+* `OperationTransfer` with `Capture` off can make a node with no encounter, depending on when it
+  is planned. `test_transfer_without_capture` fails. MechJeb's "Flyby/Impact" mode passes
+  `rendezvous: false` to `DeltaVAndTimeForHohmannTransfer` (`Capture && !MatchOrbit`), which
+  leaves the arrival point on the target's orbit free, so the burn reaches the target's orbit but
+  not always the target. 2.15 passed `Rendezvous`, true by default. Reproduced in MechJeb's own
+  window: from a 100 km Kerbin orbit, one node met the Mun and one planned a day later did not,
+  while "Transfer" at that moment did.
 * A PSG ascent of the stock Kerbal X to an 80 km circular orbit ended once with a periapsis
   of about 39 km, and reached the orbit on the next run. In the miss, guidance converged and
   flew all five stages to `TERMINAL -> FINISHED`, as the terminal check compares only the

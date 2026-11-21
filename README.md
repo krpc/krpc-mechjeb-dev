@@ -50,6 +50,10 @@ Each run builds the service first. `test/test_bindings.py` lists the MechJeb mem
 fails to bind, and the other tests run with those members missing. `--mechjeb=release` tests
 against the MechJeb release kRPC pins in place of the dev build.
 
+## Updating
+
+[UPDATING.md](UPDATING.md) moves the service to a newer MechJeb dev build and releases it.
+
 ## Source
 
 Copied from `service/MechJeb` of krpc/krpc v0.8.0

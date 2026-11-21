@@ -26,7 +26,8 @@ class MechJebDev(Mod):
     folders = ("MechJeb2",)
 
     def __init__(self, pin):
-        super().__init__(pin["url"], pin["sha256"])
+        # The archive scripts/fetch.py downloads, from the mirror or upstream
+        super().__init__(fetch.fetch("mechjeb", pin), pin["sha256"])
 
     def present(self, game, conn):
         return conn.mech_jeb.available
