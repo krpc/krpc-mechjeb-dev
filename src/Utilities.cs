@@ -18,13 +18,13 @@ namespace KRPC.MechJeb
         }
 
         /// <summary>
-        /// The autostaging settings. The same object as <see cref="AscentSettings.Staging"/>.
+        /// The autostaging settings. The ascent has its own, <see cref="AscentSettings.Staging"/>.
         /// </summary>
         [KRPCProperty]
         public Autostaging Staging { get; private set; }
 
         /// <summary>
-        /// The throttle limiters. The same object as <see cref="AscentSettings.Thrust"/>.
+        /// The throttle limiters. The ascent has its own, <see cref="AscentSettings.Thrust"/>.
         /// </summary>
         [KRPCProperty]
         public ThrustLimiter Thrust { get; private set; }

@@ -1,8 +1,16 @@
 import re
 
 import krpc
+from krpc.ksp.spacecenter import SpaceCenterConnection
+from krpc.services.krpc import KRPCConnection
+from krpc_mechjeb_dev import MechJebConnection
 
-conn = krpc.connect(name="Launch to Minmus")
+
+class Connection(KRPCConnection, SpaceCenterConnection, MechJebConnection):
+    """A connection with the MechJeb module of krpc-mechjeb-dev."""
+
+
+conn = krpc.connect[Connection](name="Launch to Minmus")
 sc = conn.space_center
 vessel = sc.active_vessel
 mj = conn.mech_jeb
@@ -150,7 +158,4 @@ status.remove()
 
 sc.clear_target()
 flight = vessel.flight()
-print(
-    "Landed at latitude %.2f, longitude %.2f"
-    % (flight.latitude, flight.longitude)
-)
+print("Landed at latitude %.2f, longitude %.2f" % (flight.latitude, flight.longitude))

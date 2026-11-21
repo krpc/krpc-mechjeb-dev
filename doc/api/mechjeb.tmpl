@@ -5,8 +5,9 @@
 MechJeb
 =======
 
-Provides functionality to interact with the `MechJeb`_ mod. |MechJeb tested|
-Originally written by `Genhis <https://github.com/Genhis/KRPC.MechJeb>`_.
+Provides functionality to interact with the `MechJeb <https://github.com/MuMech/MechJeb2>`_
+mod's dev builds. |MechJeb tested| Originally written by
+`Genhis <https://github.com/Genhis/KRPC.MechJeb>`_.
 The service acts on the MechJeb of the active vessel, which needs a part with MechJeb. Its
 classes follow MechJeb's windows: a setting is found under the window that shows it.
 
@@ -30,7 +31,12 @@ classes follow MechJeb's windows: a setting is found under the window that shows
    mechjeb/target-controller
    mechjeb/migration
 
-{% if domain.codeext %}
+.. note::
+
+   This is a best-effort replacement of kRPC's MechJeb service, from
+   `krpc-mechjeb-dev <https://github.com/krpc/krpc-mechjeb-dev>`_. Report problems there.
+
+{% if domain.codeext == 'py' %}
 Example
 -------
 
@@ -39,5 +45,3 @@ Ascent Guidance, and waits for the ascent to finish:
 
 .. literalinclude:: /scripts/api/mechjeb/MechJebExample.{{ domain.codeext }}
 {% endif %}
-
-.. include:: /mods.inc

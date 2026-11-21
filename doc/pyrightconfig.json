@@ -1,0 +1,9 @@
+{
+  "include": ["src/scripts"],
+  "typeCheckingMode": "standard",
+  "pythonVersion": "3.14",
+  "venvPath": "..",
+  "venv": ".venv",
+  "extraPaths": ["../build/stubs/python"],
+  "reportOptionalMemberAccess": "none"
+}

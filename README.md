@@ -1,14 +1,19 @@
 # kRPC MechJeb dev service
 
 A replacement for [kRPC](https://github.com/krpc/krpc)'s MechJeb service, for MechJeb dev
-builds. kRPC's own service supports the latest MechJeb release only.
+builds. kRPC's own service supports the latest MechJeb release, and does not work with the dev
+builds.
 
 This is a best-effort project. Report problems with it here, not on kRPC's tracker.
+
+The [docs](https://krpc.github.io/krpc-mechjeb-dev/) have the API for each client, and how
+each client picks up its stub.
 
 ## Install
 
 Install the kRPC release and the MechJeb dev build listed in [pins.toml](pins.toml), then unzip
-`krpc-mechjeb-dev-<version>.zip` into the KSP folder. It replaces kRPC's MechJeb files in
+`krpc-mechjeb-dev-<version>.zip`, from the [releases](https://github.com/krpc/krpc-mechjeb-dev/releases),
+into the KSP folder. It replaces kRPC's MechJeb files in
 `GameData/kRPC`. Updating kRPC puts its own MechJeb service back, so unzip this release again
 after each kRPC update.
 
@@ -26,6 +31,10 @@ python -m venv .venv
 
 `scripts/fetch.py` downloads the releases in `pins.toml` into `build/deps`, and
 `scripts/build_service.py` builds the service against them.
+
+`scripts/stubs.py` generates the client stubs into `build/stubs`, and an archive of each for the
+release. `scripts/docs.py` builds the docs into `build/doc/html`, with the tools in
+`doc/requirements.txt`.
 
 ## Test
 

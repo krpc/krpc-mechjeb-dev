@@ -9,6 +9,7 @@ Outputs, under build/:
   replaced by the built ones, as a user's install is after unzipping the release over it.
 """
 
+import glob
 import os
 import subprocess
 import sys
@@ -36,10 +37,10 @@ def version():
     ).strip()
 
 
-def servicedefs():
-    """The path of krpc-servicedefs, from the virtual environment running this script."""
-    path = os.path.join(os.path.dirname(sys.executable), "krpc-servicedefs")
-    return path if os.path.exists(path) else "krpc-servicedefs"
+def tool(name):
+    """The path of a command, from the virtual environment running this script."""
+    path = os.path.join(os.path.dirname(sys.executable), name)
+    return path if os.path.exists(path) else name
 
 
 def build():
@@ -59,7 +60,7 @@ def build():
     )
     subprocess.check_call(
         [
-            servicedefs(),
+            tool("krpc-servicedefs"),
             "MechJeb",
             os.path.join(BIN, "KRPC.MechJeb.dll"),
             *[os.path.join(KRPC_DIR, name) for name in DEPENDENCIES],
@@ -96,6 +97,9 @@ def read(path):
 
 
 def package(version):
+    # Archives of other versions, so build/ holds only this version's release
+    for old in glob.glob(os.path.join(BUILD, "krpc*-mechjeb-dev-*.zip")):
+        os.remove(old)
     files = service_files()
     release = os.path.join(BUILD, "krpc-mechjeb-dev-%s.zip" % version)
     with zipfile.ZipFile(release, "w") as archive:

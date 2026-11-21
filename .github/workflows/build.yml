@@ -16,9 +16,27 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.14"
-      - run: pip install -r requirements.txt
+      - run: pip install -r requirements.txt -r doc/requirements.txt
       - run: python scripts/build_service.py
+      # Builds the stubs and their archives first
+      - run: python scripts/docs.py
       - uses: actions/upload-artifact@v4
         with:
           name: krpc-mechjeb-dev
+          # The release assets: the archive for the game, and the stub of each client
           path: build/krpc-mechjeb-dev-*.zip
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: build/doc/html
+
+  pages:
+    if: github.event_name == 'push'
+    needs: build
+    runs-on: ubuntu-24.04
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+    steps:
+      - uses: actions/deploy-pages@v4

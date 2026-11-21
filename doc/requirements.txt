@@ -1,0 +1,10 @@
+# The docs build, at the versions kRPC's docs use
+sphinx==9.1.1
+sphinx-csharp==1.0.0
+sphinx-java==1.0.0
+sphinx-lua-ls==3.12.1
+sphinx-tabs==3.5.0
+sphinx-design==0.8.0
+pydata-sphinx-theme==0.24.0
+sphinxcontrib-httpdomain==2.2.1
+pyright

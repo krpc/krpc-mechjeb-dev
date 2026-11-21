@@ -1,6 +1,14 @@
 import krpc
+from krpc.ksp.spacecenter import SpaceCenterConnection
+from krpc.services.krpc import KRPCConnection
+from krpc_mechjeb_dev import MechJebConnection
 
-conn = krpc.connect(name="MechJeb Example")
+
+class Connection(KRPCConnection, SpaceCenterConnection, MechJebConnection):
+    """A connection with the MechJeb module of krpc-mechjeb-dev."""
+
+
+conn = krpc.connect[Connection](name="MechJeb Example")
 vessel = conn.space_center.active_vessel
 ascent = conn.mech_jeb.ascent_guidance
 
