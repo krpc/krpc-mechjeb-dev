@@ -52,7 +52,7 @@ namespace KRPC.MechJeb
             LandingGuidance.Load ();
             ManeuverPlanner.Load ();
             NodeExecutor.Load ();
-            PVGSettings.Load ();
+            PSGSettings.Load ();
             RendezvousAutopilot.Load ();
             RoverAutopilot.Load ();
             SmartASS.Load ();

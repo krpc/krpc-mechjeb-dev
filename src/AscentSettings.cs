@@ -5,71 +5,43 @@ using KRPC.Utils;
 namespace KRPC.MechJeb
 {
     /// <summary>
-    /// The Ascent Settings window, which holds the settings shared by the ascent paths.
+    /// The Ascent Settings window, which holds the settings shared by the ascent types.
     /// </summary>
     [KRPCClass (Service = "MechJeb")]
-    public sealed class AscentSettings : AscentBase
+    public sealed class AscentSettings : ComputerModule
     {
-        static Field<object, bool> correctiveSteering;
-        static Field<object, double> correctiveSteeringGain;
         static Field<object, bool> forceRoll;
         static Field<object, double> verticalRoll;
         static Field<object, double> turnRoll;
-        static Field<object, bool> autodeploySolarPanels;
-        static Field<object, bool> autoDeployAntennas;
-        static Field<object, bool> skipCircularization;
-        static Field<object, bool> autostage;
-        static Field<object, bool> limitAoA;
-        static Field<object, double> maxAoA;
-        static Field<object, double> aoaLimitFadeoutPressure;
         static Field<object, double> rollAltitude;
-        static Field<object, bool> limitingAoA;
+        static Field<object, bool> autoDeploySolarPanels;
+        static Field<object, bool> autoDeployAntennas;
+        static Field<object, bool> autostage;
+        static Field<object, bool> autowarp;
+        static Func<object, bool> limitingAoA;
         static Func<object, double> currentMaxAoA;
 
         internal static new void Load ()
         {
             var settings = Bindings.Type ("MuMech.MechJebModuleAscentSettings");
-            correctiveSteering = settings.Field<object, bool> ("CorrectiveSteering");
-            correctiveSteeringGain = Bindings.EditableDouble (settings, "CorrectiveSteeringGain");
             forceRoll = settings.Field<object, bool> ("ForceRoll");
             verticalRoll = Bindings.EditableDouble (settings, "VerticalRoll");
             turnRoll = Bindings.EditableDouble (settings, "TurnRoll");
-            autodeploySolarPanels = settings.Field<object, bool> ("AutodeploySolarPanels");
-            autoDeployAntennas = settings.Field<object, bool> ("AutoDeployAntennas");
-            skipCircularization = settings.Field<object, bool> ("SkipCircularization");
-            autostage = settings.Field<object, bool> ("Autostage");
-            limitAoA = settings.Field<object, bool> ("LimitAoA");
-            maxAoA = Bindings.EditableDouble (settings, "MaxAoA");
-            aoaLimitFadeoutPressure = Bindings.EditableDouble (settings, "AOALimitFadeoutPressure");
             rollAltitude = Bindings.EditableDouble (settings, "RollAltitude");
-            limitingAoA = settings.Field<object, bool> ("LimitingAoA");
-            currentMaxAoA = Bindings.Type ("MuMech.MechJebModuleAscentBaseAutopilot").Getter<object, double> ("CurrentMaxAoA");
+            autoDeploySolarPanels = settings.Field<object, bool> ("AutoDeploySolarPanels");
+            autoDeployAntennas = settings.Field<object, bool> ("AutoDeployAntennas");
+            autostage = settings.Field<object, bool> ("Autostage");
+            autowarp = settings.Field<object, bool> ("Autowarp");
+            limitingAoA = settings.Getter<object, bool> ("LimitingAoA");
+            currentMaxAoA = settings.Getter<object, double> ("CurrentMaxAoA");
+            AscentStaging.Load (settings);
+            AscentThrustLimits.Load (settings);
         }
 
-        /// <summary>
-        /// Whether the autopilot steers by the velocity vector rather than the position vector.
-        /// </summary>
-        /// <remarks>
-        /// It is more accurate, though large craft may do better without it. Applies on the
-        /// <see cref="AscentType.Classic"/> path.
-        /// </remarks>
-        [KRPCProperty]
-        public bool CorrectiveSteering {
-            get { return correctiveSteering.Get (Instance); }
-            set { correctiveSteering.Set (Instance, value); }
-        }
-
-        /// <summary>
-        /// The gain of the corrective steering.
-        /// </summary>
-        /// <remarks>
-        /// Requires <see cref="CorrectiveSteering"/>, and applies on the <see
-        /// cref="AscentType.Classic"/> path.
-        /// </remarks>
-        [KRPCProperty]
-        public double CorrectiveSteeringGain {
-            get { return correctiveSteeringGain.Get (Instance); }
-            set { correctiveSteeringGain.Set (Instance, value); }
+        internal AscentSettings () : base ("MechJebModuleAscentSettings")
+        {
+            Staging = new AscentStaging ();
+            Thrust = new AscentThrustLimits ();
         }
 
         /// <summary>
@@ -112,30 +84,23 @@ namespace KRPC.MechJeb
         }
 
         /// <summary>
-        /// Whether to deploy the solar panels when the ascent finishes.
+        /// Whether the ascent keeps the solar panels retracted in the atmosphere, and extends
+        /// them above it.
         /// </summary>
         [KRPCProperty]
-        public bool AutodeploySolarPanels {
-            get { return autodeploySolarPanels.Get (Instance); }
-            set { autodeploySolarPanels.Set (Instance, value); }
+        public bool AutoDeploySolarPanels {
+            get { return autoDeploySolarPanels.Get (Instance); }
+            set { autoDeploySolarPanels.Set (Instance, value); }
         }
 
         /// <summary>
-        /// Whether to deploy the antennas when the ascent finishes.
+        /// Whether the ascent keeps the antennas retracted in the atmosphere, and extends them
+        /// above it.
         /// </summary>
         [KRPCProperty]
         public bool AutoDeployAntennas {
             get { return autoDeployAntennas.Get (Instance); }
             set { autoDeployAntennas.Set (Instance, value); }
-        }
-
-        /// <summary>
-        /// Whether to skip the circularization burn.
-        /// </summary>
-        [KRPCProperty]
-        public bool SkipCircularization {
-            get { return skipCircularization.Get (Instance); }
-            set { skipCircularization.Set (Instance, value); }
         }
 
         /// <summary>
@@ -149,55 +114,26 @@ namespace KRPC.MechJeb
         }
 
         /// <summary>
-        /// The autostaging settings. The same object as <see cref="Utilities.Staging"/>.
+        /// The staging settings of the ascent, which apply in place of
+        /// <see cref="Utilities.Staging"/> while the autopilot is enabled.
         /// </summary>
         [KRPCProperty]
-        public Autostaging Staging {
-            get { return MechJeb.Utilities.Staging; }
-        }
+        public AscentStaging Staging { get; private set; }
 
         /// <summary>
-        /// The throttle limiters. The same object as <see cref="Utilities.Thrust"/>.
+        /// The throttle limits of the ascent, which apply in place of
+        /// <see cref="Utilities.Thrust"/> while the autopilot is enabled.
         /// </summary>
         [KRPCProperty]
-        public ThrustLimiter Thrust {
-            get { return MechJeb.Utilities.Thrust; }
-        }
+        public AscentThrustLimits Thrust { get; private set; }
 
         /// <summary>
-        /// Whether to limit the angle of attack.
+        /// Whether to warp time during the launch countdown and the coasts of the ascent.
         /// </summary>
-        /// <remarks>Applies on the <see cref="AscentType.Classic"/> path.</remarks>
         [KRPCProperty]
-        public bool LimitAngleOfAttack {
-            get { return limitAoA.Get (Instance); }
-            set { limitAoA.Set (Instance, value); }
-        }
-
-        /// <summary>
-        /// The largest angle of attack, in degrees.
-        /// </summary>
-        /// <remarks>
-        /// Requires <see cref="LimitAngleOfAttack"/>, and applies on the <see cref="AscentType.Classic"/>
-        /// path.
-        /// </remarks>
-        [KRPCProperty]
-        public double MaxAngleOfAttack {
-            get { return maxAoA.Get (Instance); }
-            set { maxAoA.Set (Instance, value); }
-        }
-
-        /// <summary>
-        /// The dynamic pressure below which the angle of attack limit fades out, in pascals.
-        /// </summary>
-        /// <remarks>
-        /// Requires <see cref="LimitAngleOfAttack"/>, and applies on the <see cref="AscentType.Classic"/>
-        /// path.
-        /// </remarks>
-        [KRPCProperty]
-        public double AngleOfAttackLimitFadeoutPressure {
-            get { return aoaLimitFadeoutPressure.Get (Instance); }
-            set { aoaLimitFadeoutPressure.Set (Instance, value); }
+        public bool Autowarp {
+            get { return autowarp.Get (Instance); }
+            set { autowarp.Set (Instance, value); }
         }
 
         /// <summary>
@@ -205,7 +141,7 @@ namespace KRPC.MechJeb
         /// </summary>
         [KRPCProperty]
         public bool LimitingAngleOfAttack {
-            get { return limitingAoA.Get (Instance); }
+            get { return limitingAoA (Instance); }
         }
 
         /// <summary>
@@ -213,17 +149,7 @@ namespace KRPC.MechJeb
         /// </summary>
         [KRPCProperty]
         public double CurrentMaxAngleOfAttack {
-            get { return currentMaxAoA (MechJeb.AscentGuidance.Instance); }
-        }
-
-        /// <summary>
-        /// Whether to warp time during the ascent.
-        /// </summary>
-        /// <remarks>The same setting as <see cref="ManeuverPlanner.Autowarp"/>.</remarks>
-        [KRPCProperty]
-        public bool Autowarp {
-            get { return NodeExecutor.Autowarp; }
-            set { NodeExecutor.Autowarp = value; }
+            get { return currentMaxAoA (Instance); }
         }
     }
 }

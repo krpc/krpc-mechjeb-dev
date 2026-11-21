@@ -54,9 +54,9 @@ ascent.desired_inclination = 0
 # The Ascent Settings window
 settings = ascent.settings
 settings.autostage = True
-settings.limit_angle_of_attack = True
-settings.max_angle_of_attack = 5
 settings.autowarp = True
+ascent.classic_path.limit_angle_of_attack = True
+ascent.classic_path.max_angle_of_attack = 5
 
 # Print each step of the autopilot
 status = print_steps(ascent)

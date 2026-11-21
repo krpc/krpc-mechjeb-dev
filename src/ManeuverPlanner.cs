@@ -233,8 +233,8 @@ namespace KRPC.MechJeb
         /// Whether to warp time to the burn.
         /// </summary>
         /// <remarks>
-        /// The same setting as <see cref="AscentSettings.Autowarp"/>,
-        /// <see cref="LandingGuidance.Autowarp"/> and <see cref="RendezvousAutopilot.Autowarp"/>.
+        /// The same setting as <see cref="LandingGuidance.Autowarp"/> and
+        /// <see cref="RendezvousAutopilot.Autowarp"/>.
         /// </remarks>
         [KRPCProperty]
         public bool Autowarp {

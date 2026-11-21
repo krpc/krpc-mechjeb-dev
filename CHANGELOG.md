@@ -17,6 +17,29 @@ Built against kRPC v0.8.0, for MechJeb dev-2.16.0.0-2120.
     aircraft autopilot
   - **Breaking:** Remove `OperationInterplanetaryTransfer`. Use `OperationAdvancedTransfer`
 
+- Ascent
+  - **Breaking:** Replace the PVG ascent with PSG, Polynomial SQP Guidance: `AscentType.PVG`
+    with `AscentType.PSG`, and `PVGSettings` with `PSGSettings`. PSG plans the stages itself,
+    so the PVG stage settings go
+  - **Breaking:** Set the PSG target orbit with `AscentGuidance.PeriapsisAltitude`,
+    `ApoapsisAltitude`, `BurnoutAltitude`, `FlightPathAngle` and `ArgumentOfPeriapsis`, in place
+    of `DesiredApoapsis`, `AttachAltFlag`, `DesiredAttachAlt` and `DesiredFPA`
+  - **Breaking:** Move `CorrectiveSteering`, `CorrectiveSteeringGain`, `LimitAngleOfAttack`,
+    `MaxAngleOfAttack`, `AngleOfAttackLimitFadeoutPressure` and `SkipCircularization` from
+    `AscentSettings` to `ClassicPath`, as they apply to the classic ascent only
+  - **Breaking:** `AscentSettings.Staging` and `Thrust` are the ascent's own settings,
+    `AscentStaging` and `AscentThrustLimits`, which apply in place of the general ones while
+    the ascent flies
+  - **Breaking:** `AscentSettings.Autowarp` is the ascent's own, no longer shared with the
+    maneuver planner
+  - **Breaking:** Rename `AutodeploySolarPanels` to `AutoDeploySolarPanels`
+  - **Breaking:** Remove `LaunchToRendezvous`, `LaunchPhaseAngle`, and the `Rendezvous` and
+    `Unknown` launch modes, as MechJeb 2.16 times every launch itself
+  - **Breaking:** Rename `LaunchToMatchLan` and `AscentLaunchMode.MatchLan` to
+    `LaunchToTargetLan` and `TargetLan`
+  - Add `AscentGuidance.TimeToLaunch`, and the guidance state of the PSG ascent to
+    `PSGSettings`
+
 - Maneuver planner
   - **Breaking:** Replace `OperationTransfer.Rendezvous` with `MatchOrbit`, its opposite, as in
     MechJeb 2.16

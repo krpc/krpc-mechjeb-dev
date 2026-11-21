@@ -5,20 +5,11 @@ using KRPC.Utils;
 namespace KRPC.MechJeb
 {
     /// <summary>
-    /// A wrapper of the settings of an ascent path, which MechJeb holds in its ascent settings.
-    /// </summary>
-    public abstract class AscentBase : ComputerModule
-    {
-        internal AscentBase () : base ("MechJebModuleAscentSettings")
-        {
-        }
-    }
-
-    /// <summary>
-    /// The Ascent Path Editor window, which holds the settings of the classic ascent path.
+    /// The settings of the classic ascent path, from the Ascent Path Editor window and the
+    /// Ascent Settings window.
     /// </summary>
     [KRPCClass (Service = "MechJeb")]
-    public sealed class ClassicPath : AscentBase
+    public sealed class ClassicPath : ComputerModule
     {
         static Field<object, double> turnStartAltitude;
         static Field<object, double> turnStartVelocity;
@@ -31,10 +22,16 @@ namespace KRPC.MechJeb
         static Func<object, double> autoTurnStartAltitude;
         static Func<object, double> autoTurnStartVelocity;
         static Func<object, double> autoTurnEndAltitude;
+        static Field<object, bool> correctiveSteering;
+        static Field<object, double> correctiveSteeringGain;
+        static Field<object, bool> limitAoA;
+        static Field<object, double> maxAoA;
+        static Field<object, double> aoaLimitFadeoutPressure;
+        static Field<object, bool> skipCircularization;
 
         internal static new void Load ()
         {
-            var type = Bindings.Type ("MuMech.MechJebModuleAscentSettings");
+            var type = Bindings.Type ("MuMech.MechJebModuleAscentClassicAutopilot");
             turnStartAltitude = Bindings.EditableDouble (type, "TurnStartAltitude");
             turnStartVelocity = Bindings.EditableDouble (type, "TurnStartVelocity");
             turnEndAltitude = Bindings.EditableDouble (type, "TurnEndAltitude");
@@ -46,6 +43,16 @@ namespace KRPC.MechJeb
             autoTurnStartAltitude = type.Getter<object, double> ("AutoTurnStartAltitude");
             autoTurnStartVelocity = type.Getter<object, double> ("AutoTurnStartVelocity");
             autoTurnEndAltitude = type.Getter<object, double> ("AutoTurnEndAltitude");
+            correctiveSteering = type.Field<object, bool> ("CorrectiveSteering");
+            correctiveSteeringGain = Bindings.EditableDouble (type, "CorrectiveSteeringGain");
+            limitAoA = type.Field<object, bool> ("LimitAoA");
+            maxAoA = Bindings.EditableDouble (type, "MaxAoA");
+            aoaLimitFadeoutPressure = Bindings.EditableDouble (type, "AOALimitFadeoutPressure");
+            skipCircularization = type.Field<object, bool> ("SkipCircularization");
+        }
+
+        internal ClassicPath () : base ("MechJebModuleAscentClassicAutopilot")
+        {
         }
 
         /// <summary>
@@ -145,6 +152,64 @@ namespace KRPC.MechJeb
         [KRPCProperty]
         public double AutoTurnEndAltitude {
             get { return autoTurnEndAltitude (Instance); }
+        }
+
+        /// <summary>
+        /// Whether the autopilot steers by the velocity vector rather than the position vector.
+        /// </summary>
+        /// <remarks>It is more accurate, though large craft may do better without it.</remarks>
+        [KRPCProperty]
+        public bool CorrectiveSteering {
+            get { return correctiveSteering.Get (Instance); }
+            set { correctiveSteering.Set (Instance, value); }
+        }
+
+        /// <summary>
+        /// The gain of the corrective steering.
+        /// </summary>
+        /// <remarks>Requires <see cref="CorrectiveSteering"/>.</remarks>
+        [KRPCProperty]
+        public double CorrectiveSteeringGain {
+            get { return correctiveSteeringGain.Get (Instance); }
+            set { correctiveSteeringGain.Set (Instance, value); }
+        }
+
+        /// <summary>
+        /// Whether to limit the angle of attack.
+        /// </summary>
+        [KRPCProperty]
+        public bool LimitAngleOfAttack {
+            get { return limitAoA.Get (Instance); }
+            set { limitAoA.Set (Instance, value); }
+        }
+
+        /// <summary>
+        /// The largest angle of attack, in degrees.
+        /// </summary>
+        /// <remarks>Requires <see cref="LimitAngleOfAttack"/>.</remarks>
+        [KRPCProperty]
+        public double MaxAngleOfAttack {
+            get { return maxAoA.Get (Instance); }
+            set { maxAoA.Set (Instance, value); }
+        }
+
+        /// <summary>
+        /// The dynamic pressure below which the angle of attack limit fades out, in pascals.
+        /// </summary>
+        /// <remarks>Requires <see cref="LimitAngleOfAttack"/>.</remarks>
+        [KRPCProperty]
+        public double AngleOfAttackLimitFadeoutPressure {
+            get { return aoaLimitFadeoutPressure.Get (Instance); }
+            set { aoaLimitFadeoutPressure.Set (Instance, value); }
+        }
+
+        /// <summary>
+        /// Whether to skip the circularization burn.
+        /// </summary>
+        [KRPCProperty]
+        public bool SkipCircularization {
+            get { return skipCircularization.Get (Instance); }
+            set { skipCircularization.Set (Instance, value); }
         }
     }
 }
